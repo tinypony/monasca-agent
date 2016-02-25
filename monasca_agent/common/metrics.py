@@ -58,7 +58,7 @@ class Gauge(Metric):
         self.delegated_tenant = delegated_tenant
         self.hostname = hostname
         self.device_name = device_name
-        self.timestamp = time()
+        self.timestamp = time() * 1000 #go to millisecond resolution
         if value_meta:
             self.value_meta = value_meta.copy()
         else:
@@ -258,7 +258,7 @@ class Rate(Metric):
     def sample(self, value, sample_rate, timestamp=None):
         if not timestamp:
             timestamp = time()
-        self.samples.append((int(timestamp), value))
+        self.samples.append((int(timestamp * 1000), value)) #go to millisecond resolution
 
     def _rate(self, sample1, sample2):
         rate_interval = sample2[0] - sample1[0]

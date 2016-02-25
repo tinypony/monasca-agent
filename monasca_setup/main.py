@@ -112,9 +112,16 @@ def base_configuration(args):
         dimensions.update(dict(item.strip().split(":") for item in args.dimensions.split(",")))
 
     args.dimensions = dict((name, value) for (name, value) in dimensions.iteritems())
+    if args.hostname != "localhost":
+        myhostname = args.hostname
+    else:
+        myhostname = socket.getfqdn()
+
+    log.warn("MYHOSTNAME:{0}".format(myhostname))
+
     write_template(os.path.join(args.template_dir, 'agent.yaml.template'),
                    os.path.join(args.config_dir, 'agent.yaml'),
-                   {'args': args, 'hostname': socket.getfqdn()},
+                   {'args': args, 'hostname': myhostname},
                    gid,
                    is_yaml=True)
 
@@ -186,7 +193,7 @@ def parse_arguments(parser):
                              "This assumes the base config has already run.")
     parser.add_argument('-a', '--detection_args', help="A string of arguments that will be passed to detection " +
                                                        "plugins. Only certain detection plugins use arguments.")
-    parser.add_argument('--check_frequency', help="How often to run metric collection in seconds", type=int, default=30)
+    parser.add_argument('--check_frequency', help="How often to run metric collection in milliseconds", type=int, default=30000)
     parser.add_argument('--dimensions', help="Additional dimensions to set for all metrics. A comma separated list " +
                                              "of name/value pairs, 'name:value,name2:value2'")
     parser.add_argument('--ca_file', help="Sets the path to the ca certs file if using certificates. " +
@@ -221,6 +228,8 @@ def parse_arguments(parser):
     parser.add_argument('--dry_run', help="Make no changes just report on changes", action="store_true")
     parser.add_argument('--sub_collection_warn', help="Threshold value for warning on collection time of each check (in second)", type=int, default=5)
     parser.add_argument('--collector_restart_interval', help="Collector restart interval (in hour)", type=int, default=24)
+
+    parser.add_argument('--hostname', help="Define manually hostname to be used in metrics", default='localhost')
     return parser.parse_args()
 
 
